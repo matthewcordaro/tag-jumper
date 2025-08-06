@@ -6,8 +6,10 @@ This project is a VS Code extension for quickly jumping between tags and attribu
 
 ## Key Architecture
 
-- **Extension Entrypoint:** `src/extension.ts` (not shown here, but standard for VS Code extensions)
-- **Core Logic:** `src/offset-locator.ts` implements tag/attribute boundary detection and classification.
+- **Extension Entrypoint:** `src/extension.ts`
+- **Core Logic:**
+  - `src/tag-boundary-locator.ts`: Implements tag boundary detection and classification
+  - `src/tag-attribute-locator.ts`: Implements attribute boundary detection and classification
 - **Testing:**
   - Tests are in `src/test/extension.test.ts` and use Mocha/BDD style (`describe`, `it`).
   - Test runner entry: `src/test/runTest.ts` launches the VS Code extension test host and loads the suite.
@@ -15,10 +17,9 @@ This project is a VS Code extension for quickly jumping between tags and attribu
 
 ## Keyboard Shortcuts & Navigation
 
-- **Move Forward Through Element Tags:** `Ctrl+Super+Alt+Down`
-- **Move Backward Through Element Tags:** `Ctrl+Super+Alt+Up`
-- _(Planned)_ **Move Forward/Backward Through Element Attributes:** `Ctrl+Super+Alt+Right` / `Ctrl+Super+Alt+Left`
-- These shortcuts allow users to quickly jump between tags (and, in the future, attributes) in supported files.
+- **Move Forward/Backward Element Tags:** `Ctrl+Super+Alt+Down` / `Ctrl+Super+Alt+Up`
+- **Move Forward/Backward Through Element Attributes:** `Ctrl+Super+Alt+Right` / `Ctrl+Super+Alt+Left`
+- These shortcuts allow users to quickly jump between tags and attributes in supported files.
 
 ## Developer Workflows
 
@@ -38,8 +39,7 @@ This project is a VS Code extension for quickly jumping between tags and attribu
 
 ## Project Conventions
 
-- **Imports:** Use relative imports for internal modules (e.g., `import ... from "../offset-locator"`).
-- **Notifications:** Tests may use `vscode.window.showInformationMessage` for status updates.
+- **Imports:** Use relative imports for internal modules (e.g., `import ... from "../tag-boundary-locator"`).
 - **TypeScript:** `skipLibCheck` is recommended in `tsconfig.json` to avoid third-party type errors (e.g., from `lru-cache`).
 - **No direct Node.js test execution:** Always use the VS Code extension test host for running tests.
 
@@ -52,13 +52,14 @@ This project is a VS Code extension for quickly jumping between tags and attribu
 ## Example: Adding a New Test
 
 1. Add a new `*.test.ts` file in `src/test/`.
-2. Only include test definitions (`describe`, `it`).
+2. Only include test definitions (`suite`, `test`).
 3. Run `npm run compile-tests` to compile.
 4. Run `npm test` to execute in the VS Code extension host.
 
 ## Key Files
 
-- `src/offset-locator.ts`: Core tag/attribute logic
+- `src/tag-boundary-locator.ts`: Tag boundary logic
+- `src/tag-attribute-locator.ts`: Attribute boundary logic
 - `src/test/extension.test.ts`: Main test suite
 - `src/test/runTest.ts`: Test runner entry
 - `src/test/suite/index.ts`: Mocha suite loader

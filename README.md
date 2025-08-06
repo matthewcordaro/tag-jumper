@@ -2,50 +2,69 @@
 
 ## Overview
 
-Tag Jumper is a VS Code extension that lets you quickly jump between tags and (soon) attributes in HTML, HTX, JSX, and TSX files. It is designed for fast keyboard-based navigation of markup, making editing and code review more efficient.
+Tag Jumper is a VS Code extension for quickly jumping between tags and attributes in HTML, HTX, JSX, and TSX files. The codebase is TypeScript-based and uses modern VS Code extension development practices.
 
-## Features
+## Key Architecture
 
-- **Jump Forward Through Element Tags:** Move the cursor to the next tag boundary with a single shortcut.
-- **Jump Backward Through Element Tags:** Move the cursor to the previous tag boundary.
-- **(Planned) Jump Forward/Backward Through Element Attributes:** Attribute-level navigation is coming soon.
+- **Extension Entrypoint:** `src/extension.ts`
+- **Core Logic:**
+  - `src/tag-boundary-locator.ts`: Implements tag boundary detection and classification
+  - `src/tag-attribute-locator.ts`: Implements attribute boundary detection and classification
+- **Testing:**
+  - Tests are in `src/test/extension.test.ts` and use Mocha/BDD style (`describe`, `it`).
+  - Test runner entry: `src/test/runTest.ts` launches the VS Code extension test host and loads the suite.
+  - Test suite loader: `src/test/suite/index.ts` loads all `*.test.js` files using Mocha and `glob`.
 
-## Keyboard Shortcuts
+## Keyboard Shortcuts & Navigation
 
-- **Jump Forward Tag:** `Ctrl+Super+Alt+Down`
-- **Jump Backward Tag:** `Ctrl+Super+Alt+Up`
-- **(Planned) Jump Forward Attribute:** `Ctrl+Super+Alt+Right`
-- **(Planned) Jump Backward Attribute:** `Ctrl+Super+Alt+Left`
+- **Move Forward/Backward Element Tags:** `Ctrl+Super+Alt+Down` / `Ctrl+Super+Alt+Up`
+- **Move Forward/Backward Through Element Attributes:** `Ctrl+Super+Alt+Right` / `Ctrl+Super+Alt+Left`
+- These shortcuts allow users to quickly jump between tags and attributes in supported files.
 
-Shortcuts are active in HTML, HTX, JSX, and TSX files when the editor is focused.
+## Developer Workflows
 
-## How It Works
-
-- The extension uses a custom parser (`src/offset-locator.ts`) to find tag and attribute boundaries based on the current cursor position.
-- Commands are registered in `src/extension.ts` and are available via the command palette and keyboard shortcuts.
-
-## Developer Guide
-
-- **Build:** `npm run compile`
-- **Test:** `npm test` (runs in VS Code extension host)
+- **Build:**
+  - `npm run compile` (type-check, lint, bundle with esbuild)
+  - `npm run compile-tests` (compile tests to `out/`)
 - **Lint:** `npm run lint`
-- **Watch:** `npm run watch`
-- **Add Tests:** Place new test files in `src/test/`, use Mocha/BDD style, and run `npm run compile-tests` then `npm test`.
+- **Test:** `npm test` (runs extension tests in VS Code host)
+- **Watch:** `npm run watch` (parallel watch for esbuild and tsc)
+
+## Testing Details
+
+- Do **not** run test files directly; always use the test runner (`runTest.ts`).
+- All test files must only contain test definitions, not test runner logic.
+- The test runner expects compiled test files in `out/test/`.
+- The test suite loader (`suite/index.ts`) uses `glob` to find all `*.test.js` files.
+
+## Project Conventions
+
+- **Imports:** Use relative imports for internal modules (e.g., `import ... from "../tag-boundary-locator"`).
+- **TypeScript:** `skipLibCheck` is recommended in `tsconfig.json` to avoid third-party type errors (e.g., from `lru-cache`).
+- **No direct Node.js test execution:** Always use the VS Code extension test host for running tests.
+
+## External Dependencies
+
+- `@vscode/test-electron` for running extension tests
+- `esbuild` for bundling
+- `lru-cache` (used internally or by dependencies)
+
+## Example: Adding a New Test
+
+1. Add a new `*.test.ts` file in `src/test/`.
+2. Only include test definitions (`suite`, `test`).
+3. Run `npm run compile-tests` to compile.
+4. Run `npm test` to execute in the VS Code extension host.
 
 ## Key Files
 
-- `src/offset-locator.ts`: Tag/attribute boundary logic
-- `src/extension.ts`: Command registration and VS Code integration
+- `src/tag-boundary-locator.ts`: Tag boundary logic
+- `src/tag-attribute-locator.ts`: Attribute boundary logic
 - `src/test/extension.test.ts`: Main test suite
 - `src/test/runTest.ts`: Test runner entry
 - `src/test/suite/index.ts`: Mocha suite loader
-- `package.json`: Commands, keybindings, and scripts
-
-## Planned
-
-- Attribute-level navigation (see planned keybindings in `package.json`)
-- More granular navigation for complex markup
+- `package.json`: Scripts and dependencies
 
 ---
 
-For questions or suggestions, open an issue or see `.github/copilot-instructions.md` for AI agent and contributor guidance.
+If any section is unclear or missing important project-specific details, please provide feedback to improve these instructions.
