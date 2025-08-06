@@ -34,11 +34,11 @@ function jumpToBoundary(direction: "next" | "prev") {
 
 export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
-    vscode.commands.registerCommand("element-jumper.next", () => {
+    vscode.commands.registerCommand("tag-jumper.jumpForwardTag", () => {
       jumpToBoundary("next")
     }),
 
-    vscode.commands.registerCommand("element-jumper.prev", () => {
+    vscode.commands.registerCommand("tag-jumper.jumpBackwardTag", () => {
       jumpToBoundary("prev")
     })
   )
