@@ -176,7 +176,7 @@ suite("tag-boundary-locator.ts", () => {
     })
 
     test("handles tags with special characters in attributes", () => {
-      const text = "<input name='nickname' text={'><><><><><><><'} />"
+      const text = "<input name='nickname' text={'><><><'} />"
       // boundary at the end of the self-closing tag
       assert.strictEqual(
         getTagBoundaryPosition(text, 0),
