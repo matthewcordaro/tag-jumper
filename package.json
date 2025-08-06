@@ -9,14 +9,9 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
-      {
-        "command": "tag-jumper.helloWorld",
-        "title": "Hello World"
-      },
       {
         "command": "tag-jumper.jumpForwardTag",
         "title": "Tag Jumper: Jump Forward Through Element Tags"
@@ -29,27 +24,13 @@
     "keybindings": [
       {
         "command": "tag-jumper.jumpForwardTag",
-        "key": "ctrl+super+alt+down",
-        "when": "editorTextFocus && editorLangId =~ /(html|htx|jsx|tsx)/"
+        "key": "ctrl+win+alt+down",
+        "when": "editorTextFocus && (editorLangId == 'html' || editorLangId == 'htx' || editorLangId == 'jsx' || editorLangId == 'tsx' || editorLangId == 'xml' || editorLangId == 'xhtml' || editorLangId == 'php' || editorLangId == 'vue' || editorLangId == 'svelte' || editorLangId == 'handlebars' || editorLangId == 'mustache' || editorLangId == 'razor' || editorLangId == 'twig' || editorLangId == 'ejs' || editorLangId == 'javascriptreact' || editorLangId == 'typescriptreact')"
       },
       {
         "command": "tag-jumper.jumpBackwardTag",
-        "key": "ctrl+super+alt+up",
-        "when": "editorTextFocus && editorLangId =~ /(html|htx|jsx|tsx)/"
-      }
-    ],
-    "__plannedKeybindings": [
-      {
-        "command": "tag-jumper.jumpForwardAttribute",
-        "key": "ctrl+super+alt+right",
-        "when": "editorTextFocus && editorLangId =~ /(html|htx|jsx|tsx)/",
-        "note": "Planned: Move forward through element attributes"
-      },
-      {
-        "command": "tag-jumper.jumpBackwardAttribute",
-        "key": "ctrl+super+alt+left",
-        "when": "editorTextFocus && editorLangId =~ /(html|htx|jsx|tsx)/",
-        "note": "Planned: Move backward through element attributes"
+        "key": "ctrl+win+alt+up",
+        "when": "editorTextFocus && (editorLangId == 'html' || editorLangId == 'htx' || editorLangId == 'jsx' || editorLangId == 'tsx' || editorLangId == 'xml' || editorLangId == 'xhtml' || editorLangId == 'php' || editorLangId == 'vue' || editorLangId == 'svelte' || editorLangId == 'handlebars' || editorLangId == 'mustache' || editorLangId == 'razor' || editorLangId == 'twig' || editorLangId == 'ejs' || editorLangId == 'javascriptreact' || editorLangId == 'typescriptreact')"
       }
     ]
   },
