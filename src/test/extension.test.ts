@@ -2,7 +2,7 @@ import * as assert from "assert"
 import getBoundaryOffset, {
   findNextTag,
   classifyNextElement,
-} from "../offset-locator"
+} from "../tag-boundary-locator"
 
 suite("offset-locator.ts", () => {
   suite("findNextElement()", () => {
