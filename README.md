@@ -1,71 +1,51 @@
-# tag-jumper README
+# Tag Jumper VS Code Extension
 
-This is the README for your extension "tag-jumper". After writing up a brief description, we recommend including the following sections.
+## Overview
+
+Tag Jumper is a VS Code extension that lets you quickly jump between tags and (soon) attributes in HTML, HTX, JSX, and TSX files. It is designed for fast keyboard-based navigation of markup, making editing and code review more efficient.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+- **Jump Forward Through Element Tags:** Move the cursor to the next tag boundary with a single shortcut.
+- **Jump Backward Through Element Tags:** Move the cursor to the previous tag boundary.
+- **(Planned) Jump Forward/Backward Through Element Attributes:** Attribute-level navigation is coming soon.
 
-For example if there is an image subfolder under your extension project workspace:
+## Keyboard Shortcuts
 
-\!\[feature X\]\(images/feature-x.png\)
+- **Jump Forward Tag:** `Ctrl+Super+Alt+Down`
+- **Jump Backward Tag:** `Ctrl+Super+Alt+Up`
+- **(Planned) Jump Forward Attribute:** `Ctrl+Super+Alt+Right`
+- **(Planned) Jump Backward Attribute:** `Ctrl+Super+Alt+Left`
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+Shortcuts are active in HTML, HTX, JSX, and TSX files when the editor is focused.
 
-## Requirements
+## How It Works
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+- The extension uses a custom parser (`src/offset-locator.ts`) to find tag and attribute boundaries based on the current cursor position.
+- Commands are registered in `src/extension.ts` and are available via the command palette and keyboard shortcuts.
 
-## Extension Settings
+## Developer Guide
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+- **Build:** `npm run compile`
+- **Test:** `npm test` (runs in VS Code extension host)
+- **Lint:** `npm run lint`
+- **Watch:** `npm run watch`
+- **Add Tests:** Place new test files in `src/test/`, use Mocha/BDD style, and run `npm run compile-tests` then `npm test`.
 
-For example:
+## Key Files
 
-This extension contributes the following settings:
+- `src/offset-locator.ts`: Tag/attribute boundary logic
+- `src/extension.ts`: Command registration and VS Code integration
+- `src/test/extension.test.ts`: Main test suite
+- `src/test/runTest.ts`: Test runner entry
+- `src/test/suite/index.ts`: Mocha suite loader
+- `package.json`: Commands, keybindings, and scripts
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+## Planned
 
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
+- Attribute-level navigation (see planned keybindings in `package.json`)
+- More granular navigation for complex markup
 
 ---
 
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+For questions or suggestions, open an issue or see `.github/copilot-instructions.md` for AI agent and contributor guidance.
