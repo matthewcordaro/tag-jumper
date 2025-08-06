@@ -1,5 +1,4 @@
 import * as vscode from "vscode"
-// import getBoundaryOffset from "./boundary"
 import getBoundaryOffset from "./offset-locator"
 
 function jumpToBoundary(direction: "next" | "prev") {
