@@ -5,7 +5,7 @@ import getTagBoundaryPosition, {
 } from "../tag-boundary-locator"
 
 suite("tag-boundary-locator.ts", () => {
-  suite("findNextElement()", () => {
+  suite("findNextElement() tests", () => {
     test("returns null when no tags are present", () => {
       const text = "plain text without tags"
       assert.strictEqual(findNextTag(text, 0), null)
@@ -61,22 +61,35 @@ suite("tag-boundary-locator.ts", () => {
       assert.deepStrictEqual(findNextTag(text, 0), [start, end])
     })
 
-    test("finds next tag properly when starting in an attribute value that contains '<' or '>'", () => {
+    test("finds next tag properly when starting in an element that contains '<' or '>' in an attribute", () => {
       const text = '<input text="<><><>" /><br />'
       const start = text.indexOf("<br />")
       const end = text.lastIndexOf(">")
       assert.deepStrictEqual(findNextTag(text, 2), [start, end])
     })
 
-    test("finds next tag properly when starting in an attribute value that contains '>'", () => {
-      const text = "<input name='nickname' text={'><><><><><><><'} />"
-      const start = 0
-      const end = text.lastIndexOf(">")
-      assert.deepStrictEqual(findNextTag(text, 0), [start, end])
+    suite("finds next tag properly when starting in an attribute values", () => {
+      test("contains jsx {'<...>'}", () => {
+        const text = "<input name='nickname' text={'><test1><><'} />"
+        const start = 0
+        const end = text.lastIndexOf(">")
+        // start from inside the attribute value text={'><test1><><'}
+        const fromInsideAttr = text.indexOf("><test1><><")
+        assert.deepStrictEqual(findNextTag(text, fromInsideAttr), [start, end])
+      })
+
+      test("contains '<...>'", () => {
+        const text = "<input name='nickname' text='><test2><><' />"
+        const start = 0
+        const end = text.lastIndexOf(">")
+        // start from inside the attribute value text='><test2><><'
+        const fromInsideAttr = text.indexOf("><test2><><")
+        assert.deepStrictEqual(findNextTag(text, fromInsideAttr), [start, end])
+      })
     })
   })
 
-  suite("classifyNextTag()", () => {
+  suite("classifyNextTag() tests", () => {
     test("returns null when no tags remain", () => {
       const text = "nothing here"
       assert.strictEqual(classifyNextTag(text, 0), null)
@@ -123,7 +136,7 @@ suite("tag-boundary-locator.ts", () => {
     })
   })
 
-  suite("getTagBoundaryPosition()", () => {
+  suite("getTagBoundaryPosition() tests", () => {
     test("returns null when no open or self-closing tags exist", () => {
       const text = "no tags here"
       assert.strictEqual(getTagBoundaryPosition(text, 0), null)
