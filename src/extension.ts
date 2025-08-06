@@ -1,78 +1,44 @@
 import * as vscode from "vscode"
-import getBoundaryOffset from "./tag-boundary-locator"
+import getTagBoundaryPosition from "./tag-boundary-locator"
 import getAttributeBoundaryOffset from "./tag-attribute-locator"
 
-
 /**
- * Jumps the cursor to the next or previous attribute boundary within the current editor.
- * Uses `getAttributeBoundaryOffset` to determine attribute boundaries in the document.
+ * Generic function to jump the cursor to the next or previous location (tag or attribute) within the current editor.
+ * Determines locations using the provided locator function.
  *
+ * @param locator - A function that locates positions in the document.
  * @param direction - The direction to jump: "next" for forward, "prev" for backward.
  */
-function jumpToAttribute(direction: "next" | "prev") {
+function jumpToLocation(
+  locator: (text: string, i: number) => number | null,
+  direction: "next" | "prev"
+) {
   const editor = vscode.window.activeTextEditor
   if (!editor) return
 
+  // Get the full document text and current cursor position
   const text = editor.document.getText()
   const cursorPos = editor.selection.active
-  const flatOffset = editor.document.offsetAt(cursorPos)
+  const flatPosition = editor.document.offsetAt(cursorPos)
 
-  const attrOffsets: number[] = []
-
-  // Build offset list from full text
+  // Collect all valid jump locations using the locator function
+  const positions: number[] = []
   for (let i = 0; i < text.length; i++) {
-    const offset = getAttributeBoundaryOffset(text, i)
-    if (offset !== null) attrOffsets.push(offset)
+    const position = locator(text, i)
+    if (position !== null) positions.push(position)
   }
+  // Sort locations in ascending order
+  positions.sort((a, b) => a - b)
 
-  // Sort offsets for consistent navigation
-  attrOffsets.sort((a, b) => a - b)
-
-  const targetOffset =
+  // Find the next or previous location relative to the cursor
+  const targetPosition =
     direction === "next"
-      ? attrOffsets.find((o) => o > flatOffset)
-      : [...attrOffsets].reverse().find((o) => o < flatOffset)
+      ? positions.find((o) => o > flatPosition)
+      : [...positions].reverse().find((o) => o < flatPosition)
 
-  if (targetOffset !== undefined) {
-    const targetPos = editor.document.positionAt(targetOffset)
-    editor.selection = new vscode.Selection(targetPos, targetPos)
-    editor.revealRange(new vscode.Range(targetPos, targetPos))
-  }
-}
-
-
-/**
- * Jumps the cursor to the next or previous tag boundary within the current editor.
- * Uses `getBoundaryOffset` to determine tag boundaries in the document.
- *
- * @param direction - The direction to jump: "next" for forward, "prev" for backward.
- */
-function jumpToBoundary(direction: "next" | "prev") {
-  const editor = vscode.window.activeTextEditor
-  if (!editor) return
-
-  const text = editor.document.getText()
-  const cursorPos = editor.selection.active
-  const flatOffset = editor.document.offsetAt(cursorPos)
-
-  const tagOffsets: number[] = []
-
-  // Build offset list from full text
-  for (let i = 0; i < text.length; i++) {
-    const offset = getBoundaryOffset(text, i)
-    if (offset !== null) tagOffsets.push(offset)
-  }
-
-  // Sort offsets for consistent navigation
-  tagOffsets.sort((a, b) => a - b)
-
-  const targetOffset =
-    direction === "next"
-      ? tagOffsets.find((o) => o > flatOffset)
-      : [...tagOffsets].reverse().find((o) => o < flatOffset)
-
-  if (targetOffset !== undefined) {
-    const targetPos = editor.document.positionAt(targetOffset)
+  // Move the cursor if a valid location is found
+  if (targetPosition !== undefined) {
+    const targetPos = editor.document.positionAt(targetPosition)
     editor.selection = new vscode.Selection(targetPos, targetPos)
     editor.revealRange(new vscode.Range(targetPos, targetPos))
   }
@@ -87,21 +53,19 @@ function jumpToBoundary(direction: "next" | "prev") {
 export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand("tag-jumper.jumpForwardTag", () => {
-      jumpToBoundary("next")
+      jumpToLocation(getTagBoundaryPosition, "next")
     }),
 
     vscode.commands.registerCommand("tag-jumper.jumpBackwardTag", () => {
-      jumpToBoundary("prev")
-    })
-  )
-  //Add commands for attribute navigation
-  context.subscriptions.push(
+      jumpToLocation(getTagBoundaryPosition, "prev")
+    }),
+
     vscode.commands.registerCommand("tag-jumper.jumpForwardAttribute", () => {
-      jumpToAttribute("next")
+      jumpToLocation(getAttributeBoundaryOffset, "next")
     }),
 
     vscode.commands.registerCommand("tag-jumper.jumpBackwardAttribute", () => {
-      jumpToAttribute("prev")
+      jumpToLocation(getAttributeBoundaryOffset, "prev")
     })
   )
 }

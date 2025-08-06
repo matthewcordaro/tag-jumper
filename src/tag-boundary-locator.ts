@@ -94,7 +94,7 @@ export function findNextTag(
  * @returns [type, startOffset, endOffset] or null if none found
  */
 type ElementType = "open" | "close" | "self" | "comment"
-export function classifyNextElement(
+export function classifyNextTag(
   text: string,
   startPos: number
 ): [ElementType, number, number] | null {
@@ -135,14 +135,14 @@ export function classifyNextElement(
  *   The index one position before the `>` of an open tag or before the `/` of a
  *   self-closing tag, or `null` if no further open or self-closing element is found.
  */
-export default function getBoundaryOffset(
+export default function getTagBoundaryPosition(
   text: string,
   position: number
 ): number | null {
   let cursor = position
   let lastEnd = -1
   while (true) {
-    const next = classifyNextElement(text, cursor)
+    const next = classifyNextTag(text, cursor)
     if (!next) return null
     const [type, start, end] = next
     if (type === "self") {
