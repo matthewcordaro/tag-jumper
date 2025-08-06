@@ -19,18 +19,36 @@
       {
         "command": "tag-jumper.jumpBackwardTag",
         "title": "Tag Jumper: Jump Backward Through Element Tags"
+      },
+      {
+        "command": "tag-jumper.jumpForwardAttribute",
+        "title": "Tag Jumper: Jump Forward Through Element Attributes"
+      },
+      {
+        "command": "tag-jumper.jumpBackwardAttribute",
+        "title": "Tag Jumper: Jump Backward Through Element Attributes"
       }
     ],
     "keybindings": [
       {
         "command": "tag-jumper.jumpForwardTag",
         "key": "ctrl+win+alt+down",
-        "when": "editorTextFocus && (editorLangId == 'html' || editorLangId == 'htx' || editorLangId == 'jsx' || editorLangId == 'tsx' || editorLangId == 'xml' || editorLangId == 'xhtml' || editorLangId == 'php' || editorLangId == 'vue' || editorLangId == 'svelte' || editorLangId == 'handlebars' || editorLangId == 'mustache' || editorLangId == 'razor' || editorLangId == 'twig' || editorLangId == 'ejs' || editorLangId == 'javascriptreact' || editorLangId == 'typescriptreact')"
+        "when": "editorTextFocus && (editorLangId == 'html' || editorLangId == 'htx' || editorLangId == 'jsx' || editorLangId == 'tsx' || editorLangId == 'xml' || editorLangId == 'xhtml' || editorLangId == 'javascriptreact' || editorLangId == 'typescriptreact')"
       },
       {
         "command": "tag-jumper.jumpBackwardTag",
         "key": "ctrl+win+alt+up",
-        "when": "editorTextFocus && (editorLangId == 'html' || editorLangId == 'htx' || editorLangId == 'jsx' || editorLangId == 'tsx' || editorLangId == 'xml' || editorLangId == 'xhtml' || editorLangId == 'php' || editorLangId == 'vue' || editorLangId == 'svelte' || editorLangId == 'handlebars' || editorLangId == 'mustache' || editorLangId == 'razor' || editorLangId == 'twig' || editorLangId == 'ejs' || editorLangId == 'javascriptreact' || editorLangId == 'typescriptreact')"
+        "when": "editorTextFocus && (editorLangId == 'html' || editorLangId == 'htx' || editorLangId == 'jsx' || editorLangId == 'tsx' || editorLangId == 'xml' || editorLangId == 'xhtml' || editorLangId == 'javascriptreact' || editorLangId == 'typescriptreact')"
+      },
+      {
+        "command": "tag-jumper.jumpForwardAttribute",
+        "key": "ctrl+win+alt+right",
+        "when": "editorTextFocus && (editorLangId == 'html' || editorLangId == 'htx' || editorLangId == 'jsx' || editorLangId == 'tsx' || editorLangId == 'xml' || editorLangId == 'xhtml' || editorLangId == 'javascriptreact' || editorLangId == 'typescriptreact')"
+      },
+      {
+        "command": "tag-jumper.jumpBackwardAttribute",
+        "key": "ctrl+win+alt+left",
+        "when": "editorTextFocus && (editorLangId == 'html' || editorLangId == 'htx' || editorLangId == 'jsx' || editorLangId == 'tsx' || editorLangId == 'xml' || editorLangId == 'xhtml' || editorLangId == 'javascriptreact' || editorLangId == 'typescriptreact')"
       }
     ]
   },
