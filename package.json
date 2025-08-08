@@ -50,7 +50,17 @@
         "key": "ctrl+win+alt+left",
         "when": "editorTextFocus && (editorLangId == 'html' || editorLangId == 'htx' || editorLangId == 'jsx' || editorLangId == 'tsx' || editorLangId == 'xml' || editorLangId == 'xhtml' || editorLangId == 'javascriptreact' || editorLangId == 'typescriptreact')"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "Tag Jumper",
+      "properties": {
+        "tag-jumper.includeTagPositionsInAttributeNavigation": {
+          "type": "boolean",
+          "default": true,
+          "description": "If enabled, attribute navigation will also include tag navigation positions."
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",

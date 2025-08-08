@@ -6,56 +6,89 @@ import {
 import LRU from "lru-cache"
 import { createHash } from "crypto"
 
+// Default value for including tag positions in attribute navigation
+const DEFAULT_INCLUDE_TAG_IN_ATTR_NAV = true
+
 // LRU cache for boundary positions by text hash
 // The cache is intentionally keyed by a hash of the document content, so undo/redo operations
 // that restore previous content can instantly reuse cached results. This avoids unnecessary AST parsing.
-const boundaryCache = new LRU<string, { tag: number[]; attr: number[] }>({
-  max: 20,
+const boundaryCache = new LRU<string, number[]>({
+  max: 40,
 })
 
 function hashText(text: string): string {
   return createHash("sha1").update(text).digest("hex")
 }
 
-function getCachedBoundaries(text: string, type: "tag" | "attr"): number[] {
-  const hash = hashText(text)
-  let entry = boundaryCache.get(hash)
+/**
+ * Returns cached boundary positions for a given function and document text.
+ *
+ * Caches the result of the boundary function (e.g., tag or attribute locator) using a key
+ * composed of the document content hash and the function's name. This ensures that each
+ * boundary function's results are cached independently for each unique document state.
+ *
+ * @param text - The full document text to analyze.
+ * @param fn - The boundary locator function (must have a unique .name property).
+ * @returns The array of boundary positions for the given function and text.
+ */
+function getCachedBoundaries(
+  text: string,
+  fn: (text: string) => number[]
+): number[] {
+  // Use the function's name to distinguish cache entries for different boundary functions
+  const fnName = fn.name || "anonymous"
+  // Cache key is the hash of the text plus the function name
+  const key = hashText(text) + ":" + fnName
+  let entry = boundaryCache.get(key)
   if (!entry) {
-    entry = {
-      tag: getTagBoundaryPositions(text),
-      attr: getAttributeBoundaryPositions(text),
-    }
-    boundaryCache.set(hash, entry)
+    // Compute and cache the result if not present
+    entry = fn(text)
+    boundaryCache.set(key, entry)
   }
-  return type === "tag" ? entry.tag : entry.attr
+  return entry
 }
 
 /**
- * Generic function to jump the cursor to the next or previous boundary using a boundaryPositions function.
- * @param boundaryPositionsFn - Function that returns an array of boundary positions for the document text.
+ * Moves the cursor to the next or previous boundary position as determined by one or more boundary locator functions.
+ *
+ * - Collects all boundary positions from the provided functions.
+ * - Deduplicates and sorts the positions.
+ * - Finds the next or previous position relative to the current cursor.
+ * - Moves the cursor and reveals the new position if found.
+ *
+ * @param boundaryFns - Array of functions that return arrays of boundary positions for the document text.
  * @param direction - The direction to jump: "next" for forward, "prev" for backward.
  */
 function jumpToBoundary(
-  boundaryPositionsFn: (text: string) => number[],
+  boundaryFns: Array<(text: string) => number[]>,
   direction: "next" | "prev"
 ) {
+  // Get the active editor; do nothing if none
   const editor = vscode.window.activeTextEditor
   if (!editor) return
 
+  // Get the full document text
   const text = editor.document.getText()
-  const type = boundaryPositionsFn === getTagBoundaryPositions ? "tag" : "attr"
-  const positions = getCachedBoundaries(text, type).slice()
+  // Gather all boundary positions from all functions
+  let positions: number[] = []
+  for (const fn of boundaryFns) {
+    positions = positions.concat(getCachedBoundaries(text, fn))
+  }
+  // Remove duplicates and sort positions in ascending order
+  positions = Array.from(new Set(positions))
   positions.sort((a, b) => a - b)
 
+  // Get the current cursor position as a flat offset
   const cursorPos = editor.selection.active
   const flatPosition = editor.document.offsetAt(cursorPos)
 
-  // Find the next or previous boundary
+  // Find the next or previous boundary position
   const targetPosition =
     direction === "next"
       ? positions.find((o) => o > flatPosition)
       : [...positions].reverse().find((o) => o < flatPosition)
 
+  // Move the cursor if a target position was found
   if (targetPosition !== undefined) {
     const targetPos = editor.document.positionAt(targetPosition)
     editor.selection = new vscode.Selection(targetPos, targetPos)
@@ -70,20 +103,38 @@ function jumpToBoundary(
  */
 export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
+    // Tag navigation commands
     vscode.commands.registerCommand("tag-jumper.jumpForwardTag", () => {
-      jumpToBoundary(getTagBoundaryPositions, "next")
+      jumpToBoundary([getTagBoundaryPositions], "next")
     }),
 
     vscode.commands.registerCommand("tag-jumper.jumpBackwardTag", () => {
-      jumpToBoundary(getTagBoundaryPositions, "prev")
+      jumpToBoundary([getTagBoundaryPositions], "prev")
     }),
 
+    // Attribute navigation commands
     vscode.commands.registerCommand("tag-jumper.jumpForwardAttribute", () => {
-      jumpToBoundary(getAttributeBoundaryPositions, "next")
+      const config = vscode.workspace.getConfiguration("tag-jumper")
+      const includeTag = config.get<boolean>(
+        "includeTagPositionsInAttributeNavigation",
+        DEFAULT_INCLUDE_TAG_IN_ATTR_NAV
+      )
+      const fns = includeTag
+        ? [getAttributeBoundaryPositions, getTagBoundaryPositions]
+        : [getAttributeBoundaryPositions]
+      jumpToBoundary(fns, "next")
     }),
 
     vscode.commands.registerCommand("tag-jumper.jumpBackwardAttribute", () => {
-      jumpToBoundary(getAttributeBoundaryPositions, "prev")
+      const config = vscode.workspace.getConfiguration("tag-jumper")
+      const includeTag = config.get<boolean>(
+        "includeTagPositionsInAttributeNavigation",
+        DEFAULT_INCLUDE_TAG_IN_ATTR_NAV
+      )
+      const fns = includeTag
+        ? [getAttributeBoundaryPositions, getTagBoundaryPositions]
+        : [getAttributeBoundaryPositions]
+      jumpToBoundary(fns, "prev")
     })
   )
 }
