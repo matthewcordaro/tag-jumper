@@ -34,22 +34,22 @@
       {
         "command": "tag-jumper.jumpForwardTag",
         "key": "ctrl+win+alt+down",
-        "when": "editorTextFocus && (editorLangId == 'html' || editorLangId == 'htx' || editorLangId == 'jsx' || editorLangId == 'tsx' || editorLangId == 'xml' || editorLangId == 'xhtml' || editorLangId == 'javascriptreact' || editorLangId == 'typescriptreact')"
+        "when": "editorTextFocus"
       },
       {
         "command": "tag-jumper.jumpBackwardTag",
         "key": "ctrl+win+alt+up",
-        "when": "editorTextFocus && (editorLangId == 'html' || editorLangId == 'htx' || editorLangId == 'jsx' || editorLangId == 'tsx' || editorLangId == 'xml' || editorLangId == 'xhtml' || editorLangId == 'javascriptreact' || editorLangId == 'typescriptreact')"
+        "when": "editorTextFocus"
       },
       {
         "command": "tag-jumper.jumpForwardAttribute",
         "key": "ctrl+win+alt+right",
-        "when": "editorTextFocus && (editorLangId == 'html' || editorLangId == 'htx' || editorLangId == 'jsx' || editorLangId == 'tsx' || editorLangId == 'xml' || editorLangId == 'xhtml' || editorLangId == 'javascriptreact' || editorLangId == 'typescriptreact')"
+        "when": "editorTextFocus"
       },
       {
         "command": "tag-jumper.jumpBackwardAttribute",
         "key": "ctrl+win+alt+left",
-        "when": "editorTextFocus && (editorLangId == 'html' || editorLangId == 'htx' || editorLangId == 'jsx' || editorLangId == 'tsx' || editorLangId == 'xml' || editorLangId == 'xhtml' || editorLangId == 'javascriptreact' || editorLangId == 'typescriptreact')"
+        "when": "editorTextFocus"
       }
     ],
     "configuration": {
@@ -62,7 +62,9 @@
         },
         "tag-jumper.activationOnLanguage": {
           "type": "array",
-          "items": { "type": "string" },
+          "items": {
+            "type": "string"
+          },
           "default": [
             "html",
             "xml",
