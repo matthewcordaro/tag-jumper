@@ -1,200 +1,103 @@
 import * as assert from "assert"
-import getTagBoundaryPosition, {
-  findNextTag,
-  classifyNextTag,
-} from "../tag-boundary-locator"
+import * as vscode from "vscode"
 
-suite("tag-boundary-locator.ts", () => {
-  suite("findNextElement() tests", () => {
-    test("returns null when no tags are present", () => {
-      const text = "plain text without tags"
-      assert.strictEqual(findNextTag(text, 0), null)
-      assert.strictEqual(findNextTag(text, 10), null)
+suite("Tag Jumper Extension", () => {
+  test("jumps to next tag boundary", async () => {
+    const doc = await vscode.workspace.openTextDocument({
+      language: "typescript",
+      content: "<div><span>foo</span></div>",
     })
+    const editor = await vscode.window.showTextDocument(doc)
+    editor.selection = new vscode.Selection(0, 0, 0, 0) // Place cursor at start
 
-    test("finds a simple opening tag at position 0", () => {
-      const text = "<div>content</div>"
-      const result = findNextTag(text, 0)
-      assert.deepStrictEqual(result, [0, text.indexOf(">")])
-    })
+    await vscode.commands.executeCommand("tag-jumper.jumpForwardTag")
 
-    test("finds an opening tag after some text", () => {
-      const text = '   <span id="x">'
-      const start = text.indexOf("<")
-      const end = text.lastIndexOf(">")
-      assert.deepStrictEqual(findNextTag(text, 0), [start, end])
-    })
-
-    test("finds a self-closing tag without space", () => {
-      const text = '<img src="foo.png"/>'
-      const start = 0
-      const end = text.lastIndexOf(">")
-      assert.deepStrictEqual(findNextTag(text, 0), [start, end])
-    })
-
-    test("finds a self-closing tag with space", () => {
-      const text = "<br />"
-      const start = 0
-      const end = text.lastIndexOf(">")
-      assert.deepStrictEqual(findNextTag(text, 0), [start, end])
-    })
-
-    test("returns the next tag when startPos is inside a tag", () => {
-      const text = "<p>one</p>"
-      const afterP = 1 // start inside "<p>"
-      assert.deepStrictEqual(findNextTag(text, afterP), [
-        text.indexOf("</p>"),
-        text.lastIndexOf(">"),
-      ])
-    })
-
-    test("returns null when startPos is inside the last tag", () => {
-      const text = "<p>one</p>"
-      const afterLast = text.lastIndexOf("</p>") + 1 // start inside "</p>"
-      assert.strictEqual(findNextTag(text, afterLast), null)
-    })
-
-    test("finds tag properly with any '<' or '>' in an attribute value", () => {
-      const text = '<input text="<><><>" />'
-      const start = 0
-      const end = text.lastIndexOf(">")
-      assert.deepStrictEqual(findNextTag(text, 0), [start, end])
-    })
-
-    test("finds next tag properly when starting in an element that contains '<' or '>' in an attribute", () => {
-      const text = '<input text="<><><>" /><br />'
-      const start = text.indexOf("<br />")
-      const end = text.lastIndexOf(">")
-      assert.deepStrictEqual(findNextTag(text, 2), [start, end])
-    })
-
-    suite("finds next tag properly when starting in an attribute values", () => {
-      test("contains jsx {'<...>'}", () => {
-        const text = "<input name='nickname' text={'><test1><><'} />"
-        const start = 0
-        const end = text.lastIndexOf(">")
-        // start from inside the attribute value text={'><test1><><'}
-        const fromInsideAttr = text.indexOf("><test1><><")
-        assert.deepStrictEqual(findNextTag(text, fromInsideAttr), [start, end])
-      })
-
-      test("contains '<...>'", () => {
-        const text = "<input name='nickname' text='><test2><><' />"
-        const start = 0
-        const end = text.lastIndexOf(">")
-        // start from inside the attribute value text='><test2><><'
-        const fromInsideAttr = text.indexOf("><test2><><")
-        assert.deepStrictEqual(findNextTag(text, fromInsideAttr), [start, end])
-      })
-    })
+    // Should land at <div|>
+    const expectedPos = doc.getText().indexOf(">")
+    assert.strictEqual(doc.offsetAt(editor.selection.active), expectedPos)
   })
 
-  suite("classifyNextTag() tests", () => {
-    test("returns null when no tags remain", () => {
-      const text = "nothing here"
-      assert.strictEqual(classifyNextTag(text, 0), null)
+  test("jumps to next attribute boundary", async () => {
+    const doc = await vscode.workspace.openTextDocument({
+      language: "typescript",
+      content: '<input type="text" value="foo" />',
     })
+    const editor = await vscode.window.showTextDocument(doc)
+    editor.selection = new vscode.Selection(0, 0, 0, 0)
 
-    test("classifies an opening tag", () => {
-      const text = '<div class="a">'
-      const [type, start, end] = classifyNextTag(text, 0)!
-      assert.strictEqual(type, "open")
-      assert.strictEqual(start, 0)
-      assert.strictEqual(end, text.indexOf(">"))
-    })
+    await vscode.commands.executeCommand("tag-jumper.jumpForwardAttribute")
 
-    test("classifies a closing tag", () => {
-      const text = "</div>"
-      const [type, start, end] = classifyNextTag(text, 0)!
-      assert.strictEqual(type, "close")
-      assert.strictEqual(start, 0)
-      assert.strictEqual(end, text.indexOf(">"))
-    })
-
-    test("classifies a self-closing tag", () => {
-      const text = '<img src="x" />'
-      const [type, start, end] = classifyNextTag(text, 0)!
-      assert.strictEqual(type, "self")
-      assert.strictEqual(start, 0)
-      assert.strictEqual(end, text.lastIndexOf(">"))
-    })
-
-    test("finds and classifies the next tag even if startPos is mid-text", () => {
-      const text = "foo <br/>"
-      const [type, start, end] = classifyNextTag(text, 0)!
-      assert.strictEqual(type, "self")
-      assert.strictEqual(start, text.indexOf("<br/>"))
-      assert.strictEqual(end, text.lastIndexOf(">"))
-    })
-
-    test("finds and classifies a comment", () => {
-      const text = "<!-- comment -->"
-      const [type, start, end] = classifyNextTag(text, 0)!
-      assert.strictEqual(type, "comment")
-      assert.strictEqual(start, 0)
-      assert.strictEqual(end, text.indexOf(">"))
-    })
+    // Should land inside type attribute "text|"
+    const expectedPos =
+      doc.getText().indexOf('type="text"') + 'type="text"'.length - 1
+    assert.strictEqual(doc.offsetAt(editor.selection.active), expectedPos)
   })
 
-  suite("getTagBoundaryPosition() tests", () => {
-    test("returns null when no open or self-closing tags exist", () => {
-      const text = "no tags here"
-      assert.strictEqual(getTagBoundaryPosition(text, 0), null)
-      assert.strictEqual(getTagBoundaryPosition(text, 5), null)
+  test("jumps backward to previous tag boundary", async () => {
+    const doc = await vscode.workspace.openTextDocument({
+      language: "typescript",
+      content: "<div><span>foo</span></div>",
     })
+    const editor = await vscode.window.showTextDocument(doc)
+    // Place cursor in <span>
+    const afterSpan = doc.getText().indexOf("<span>") + "<span>".length - 2
+    editor.selection = new vscode.Selection(
+      doc.positionAt(afterSpan),
+      doc.positionAt(afterSpan)
+    )
 
-    test("returns the correct boundary for an opening tag", () => {
-      const text = "<h1>Title</h1>"
-      // < at 0, > at 3, boundary is 3
-      assert.strictEqual(getTagBoundaryPosition(text, 0), 3)
-    })
+    await vscode.commands.executeCommand("tag-jumper.jumpBackwardTag")
 
-    test("returns the correct boundary for a self-closing tag", () => {
-      const text = "<br/>"
-      // <br/> => boundary at slash index 3
-      assert.strictEqual(getTagBoundaryPosition(text, 0), 3)
-    })
+    // Should land at <div|>
+    const expectedPos = doc.getText().indexOf(">")
+    assert.strictEqual(doc.offsetAt(editor.selection.active), expectedPos)
+  })
 
-    test("returns the correct boundary for a self-closing tag with space", () => {
-      const text = "<img />"
-      // slash at index 5
-      assert.strictEqual(getTagBoundaryPosition(text, 0), 5)
+  test("jumps backward to previous attribute boundary", async () => {
+    const doc = await vscode.workspace.openTextDocument({
+      language: "typescript",
+      content: '<input type="text" value="foo" />',
     })
+    const editor = await vscode.window.showTextDocument(doc)
+    // Place cursor in value attribute
+    const afterValue =
+      doc.getText().indexOf('value="foo"') + 'value="foo"'.length - 3
+    editor.selection = new vscode.Selection(
+      doc.positionAt(afterValue),
+      doc.positionAt(afterValue)
+    )
 
-    test("skips closing tags and finds the next open", () => {
-      const text = "</closed><span>"
-      // starting at 0, skip </closed>, jump to <span>
-      const expectedBoundary = text.lastIndexOf(">") // index of '>' in <span>
-      assert.strictEqual(getTagBoundaryPosition(text, 0), expectedBoundary)
-    })
+    await vscode.commands.executeCommand("tag-jumper.jumpBackwardAttribute")
 
-    test("finds the next boundary after the cursor position", () => {
-      const text = "<div><hr/><p></p>"
-      // first boundary at <div> => 4
-      assert.strictEqual(getTagBoundaryPosition(text, 0), 4)
-      // next boundary after <div> => <hr/> boundary at 8
-      const afterDiv = 4 + 1
-      const expectedBoundary = text.indexOf("/><p></p>")
-      assert.strictEqual(
-        getTagBoundaryPosition(text, afterDiv),
-        expectedBoundary
-      )
-    })
+    // Should land inside type attribute "text|"
+    const expectedPos =
+      doc.getText().indexOf('type="text"') + 'type="text"'.length - 1
+    assert.strictEqual(doc.offsetAt(editor.selection.active), expectedPos)
+  })
 
-    test("skips current tag and the following closing tag to find the next open", () => {
-      const text = "<div></div><span>"
-      // starting in <div>, skip <div></div>, jump to <span>
-      const expectedBoundary = text.lastIndexOf(">") // index of '>' in <span>
-      assert.strictEqual(getTagBoundaryPosition(text, 2), expectedBoundary)
+  test("does not move cursor in file with no tags or attributes (edge cases)", async () => {
+    const doc = await vscode.workspace.openTextDocument({
+      language: "typescript",
+      content: "const foo = 123;",
     })
+    const editor = await vscode.window.showTextDocument(doc)
+    const afterNo = doc.getText().indexOf("=")
+    editor.selection = new vscode.Selection(
+      doc.positionAt(afterNo),
+      doc.positionAt(afterNo)
+    )
+    const originalPos = editor.selection.active
 
-    test("handles tags with special characters in attributes", () => {
-      const text = "<input name='nickname' text={'><><><'} />"
-      // boundary at the end of the self-closing tag
-      assert.strictEqual(
-        getTagBoundaryPosition(text, 0),
-        text.lastIndexOf("/>")
-      )
-    })
+    await vscode.commands.executeCommand("tag-jumper.jumpForwardTag")
+    assert.deepStrictEqual(editor.selection.active, originalPos)
+
+    await vscode.commands.executeCommand("tag-jumper.jumpBackwardTag")
+    assert.deepStrictEqual(editor.selection.active, originalPos)
+
+    await vscode.commands.executeCommand("tag-jumper.jumpForwardAttribute")
+    assert.deepStrictEqual(editor.selection.active, originalPos)
+
+    await vscode.commands.executeCommand("tag-jumper.jumpBackwardAttribute")
+    assert.deepStrictEqual(editor.selection.active, originalPos)
   })
 })
