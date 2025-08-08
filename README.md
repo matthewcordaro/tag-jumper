@@ -1,70 +1,48 @@
 # Tag Jumper VS Code Extension
 
-## Overview
+Tag Jumper is a VS Code extension for quickly jumping between tags and attributes in HTML, HTX, JSX, and TSX files. It is designed for fast navigation in markup-heavy codebases, supporting both tag and attribute navigation with user-configurable behavior.
 
-Tag Jumper is a VS Code extension for quickly jumping between tags and attributes in HTML, HTX, JSX, and TSX files. The codebase is TypeScript-based and uses modern VS Code extension development practices.
+## Features
 
-## Key Architecture
+- **Jump between element tags** (open/self-closing) and attributes in supported files.
+- **Keyboard Shortcuts:**
+  - Move Forward/Backward Element Tags: `Ctrl+Super+Alt+Down` / `Ctrl+Super+Alt+Up`
+  - Move Forward/Backward Through Element Attributes: `Ctrl+Super+Alt+Right` / `Ctrl+Super+Alt+Left`
+- **Configurable attribute navigation:**
+  - By default, attribute navigation also includes tag boundaries (can be changed in settings).
+- **Fast:** Uses a per-function, per-document-content cache for boundary positions.
 
-- **Extension Entrypoint:** `src/extension.ts`
-- **Core Logic:**
-  - `src/tag-boundary-locator.ts`: Implements tag boundary detection and classification
-  - `src/tag-attribute-locator.ts`: Implements attribute boundary detection and classification
-- **Testing:**
-  - Tests are in `src/test/extension.test.ts` and use Mocha/BDD style (`describe`, `it`).
-  - Test runner entry: `src/test/runTest.ts` launches the VS Code extension test host and loads the suite.
-  - Test suite loader: `src/test/suite/index.ts` loads all `*.test.js` files using Mocha and `glob`.
+## Settings
 
-## Keyboard Shortcuts & Navigation
+- `tag-jumper.includeTagPositionsInAttributeNavigation` (boolean, default: `true`)
+  - If enabled, attribute navigation will also include tag navigation positions.
+  - Change this in VS Code settings UI or your `settings.json`.
 
-- **Move Forward/Backward Element Tags:** `Ctrl+Super+Alt+Down` / `Ctrl+Super+Alt+Up`
-- **Move Forward/Backward Through Element Attributes:** `Ctrl+Super+Alt+Right` / `Ctrl+Super+Alt+Left`
-- These shortcuts allow users to quickly jump between tags and attributes in supported files.
+## How It Works
 
-## Developer Workflows
+- Tag and attribute boundaries are detected using Babel AST parsing.
+- Navigation commands use a cache keyed by document content and boundary function for performance.
+- The extension is written in TypeScript and follows modern VS Code extension best practices.
 
-- **Build:**
-  - `npm run compile` (type-check, lint, bundle with esbuild)
-  - `npm run compile-tests` (compile tests to `out/`)
+## Development
+
+- **Build:** `npm run compile`
+- **Test:** `npm test`
 - **Lint:** `npm run lint`
-- **Test:** `npm test` (runs extension tests in VS Code host)
-- **Watch:** `npm run watch` (parallel watch for esbuild and tsc)
-
-## Testing Details
-
-- Do **not** run test files directly; always use the test runner (`runTest.ts`).
-- All test files must only contain test definitions, not test runner logic.
-- The test runner expects compiled test files in `out/test/`.
-- The test suite loader (`suite/index.ts`) uses `glob` to find all `*.test.js` files.
-
-## Project Conventions
-
-- **Imports:** Use relative imports for internal modules (e.g., `import ... from "../tag-boundary-locator"`).
-- **TypeScript:** `skipLibCheck` is recommended in `tsconfig.json` to avoid third-party type errors (e.g., from `lru-cache`).
-- **No direct Node.js test execution:** Always use the VS Code extension test host for running tests.
-
-## External Dependencies
-
-- `@vscode/test-electron` for running extension tests
-- `esbuild` for bundling
-- `lru-cache` (used internally or by dependencies)
-
-## Example: Adding a New Test
-
-1. Add a new `*.test.ts` file in `src/test/`.
-2. Only include test definitions (`suite`, `test`).
-3. Run `npm run compile-tests` to compile.
-4. Run `npm test` to execute in the VS Code extension host.
+- **Watch:** `npm run watch`
+- **Add tests:** Place new test files in `src/test/`, run `npm run compile-tests`, then `npm test`.
 
 ## Key Files
 
-- `src/tag-boundary-locator.ts`: Tag boundary logic
-- `src/tag-attribute-locator.ts`: Attribute boundary logic
-- `src/test/extension.test.ts`: Main test suite
-- `src/test/runTest.ts`: Test runner entry
-- `src/test/suite/index.ts`: Mocha suite loader
-- `package.json`: Scripts and dependencies
+- `src/extension.ts` — Extension entrypoint and command registration
+- `src/babel-boundary-locator.ts` — Tag and attribute boundary logic
+- `src/test/extension.test.ts` — Main test suite
 
----
+## Requirements
 
-If any section is unclear or missing important project-specific details, please provide feedback to improve these instructions.
+- Node.js >= 16
+- VS Code >= 1.70
+
+## License
+
+MIT
