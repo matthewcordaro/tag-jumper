@@ -133,14 +133,10 @@ export function getTagBoundaryPositions(text: string): number[] {
  */
 export function getAttributeBoundaryPositions(text: string): number[] {
   const ast = parse(text, BABEL_PARSE_OPTIONS)
-
   const boundaries: number[] = []
-
   traverse(ast, {
     JSXOpeningElement(path) {
-      // Iterate over all attributes in the opening tag
       for (const attr of path.node.attributes) {
-        // All attributes should have an end position
         if (!attr.end) {
           throw new Error(
             `Unexpected missing end position for attribute at position ${
@@ -148,84 +144,81 @@ export function getAttributeBoundaryPositions(text: string): number[] {
             }`
           )
         }
-        // Handle spread attributes: <input {...props} />
-        if (attr.type === "JSXSpreadAttribute") {
-          boundaries.push(attr.end - 1)
-        }
-        // Handle normal JSX attributes
-        else if (attr.type === "JSXAttribute") {
-          // Boolean attribute: <input visible />
-          if (attr.value === null) {
-            boundaries.push(attr.end)
-          }
-          // Defensive: should never be undefined
-          else if (attr.value === undefined) {
+        switch (attr.type) {
+          case "JSXSpreadAttribute":
+            // <input {...props} />
+            boundaries.push(attr.end - 1)
+            break
+          case "JSXAttribute":
+            boundaries.push(getJSXAttributeBoundary(attr))
+            break
+          default: {
+            const attrType = (attr as any).type ?? "unknown"
+            const attrStart = (attr as any).start ?? "unknown"
             throw new Error(
-              `Unexpected undefined attribute value for attribute '${
-                attr.name?.name ?? "unknown"
-              }' at position ${attr.start ?? "unknown"}`
+              `Unexpected attribute type '${attrType}' at position ${attrStart}`
             )
           }
-          // Attribute has a value
-          else {
-            // String literal, JSX fragment, or JSX element as value
-            if (
-              attr.value.type === "StringLiteral" || // <input value="foo"
-              attr.value.type === "JSXFragment" || // <Widget content={<>{foo}</>} />
-              attr.value.type === "JSXElement" // <Widget content={<span>bar</span>} />
-            ) {
-              boundaries.push(attr.end! - 1)
-            }
-            // Expression container: <input value={foo} />
-            else if (attr.value.type === "JSXExpressionContainer") {
-              const exprType = attr.value.expression.type
-              const offset = JSX_EXPRESSION_TYPE_OFFSETS[exprType]
-              if (typeof offset === "number") {
-                boundaries.push(attr.end! + offset)
-                // See lookup table for offset meaning
-              } else {
-                throw new Error(
-                  `Unexpected JSXExpressionContainer type '${exprType}' for attribute '${
-                    attr.name?.name ?? "unknown"
-                  }' at position ${attr.start ?? "unknown"}`
-                )
-              }
-            }
-            // Defensive: unknown object with a type
-            else if (
-              typeof attr.value === "object" &&
-              attr.value !== null &&
-              "type" in attr.value
-            ) {
-              throw new Error(
-                `Unexpected JSXAttribute value type '${
-                  (attr.value as { type: string }).type
-                }' for attribute '${
-                  attr.name?.name ?? "unknown"
-                }' at position ${attr.start ?? "unknown"}`
-              )
-            }
-            // Defensive: completely unexpected value
-            else {
-              throw new Error(
-                `Unexpected JSXAttribute value for attribute '${
-                  attr.name?.name ?? "unknown"
-                }' at position ${attr.start ?? "unknown"}`
-              )
-            }
-          }
-        }
-        // Defensive: unknown attribute type
-        else {
-          const attrType = (attr as any).type ?? "unknown"
-          const attrStart = (attr as any).start ?? "unknown"
-          throw new Error(
-            `Unexpected attribute type '${attrType}' at position ${attrStart}`
-          )
         }
       }
     },
   })
-
   return boundaries
+}
+
+function getJSXAttributeBoundary(attr: any): number {
+  // Boolean attribute: <input visible />
+  if (attr.value === null) {
+    return attr.end
+  }
+  // Defensive: should never be undefined
+  if (attr.value === undefined) {
+    throw new Error(
+      `Unexpected undefined attribute value for attribute '${
+        attr.name?.name ?? "unknown"
+      }' at position ${attr.start ?? "unknown"}`
+    )
+  }
+  // String literal, JSX fragment, or JSX element as value
+  if (
+    attr.value.type === "StringLiteral" || // <input value="foo"
+    attr.value.type === "JSXFragment" || // <Widget content={<>{foo}</>} />
+    attr.value.type === "JSXElement" // <Widget content={<span>bar</span>} />
+  ) {
+    return attr.end - 1
+  }
+  // Expression container: <input value={foo} />
+  if (attr.value.type === "JSXExpressionContainer") {
+    const exprType = attr.value.expression.type
+    const offset = JSX_EXPRESSION_TYPE_OFFSETS[exprType]
+    if (typeof offset === "number") {
+      return attr.end + offset
+    } else {
+      throw new Error(
+        `Unexpected JSXExpressionContainer type '${exprType}' for attribute '${
+          attr.name?.name ?? "unknown"
+        }' at position ${attr.start ?? "unknown"}`
+      )
+    }
+  }
+  // Defensive: unknown object with a type
+  if (
+    typeof attr.value === "object" &&
+    attr.value !== null &&
+    "type" in attr.value
+  ) {
+    throw new Error(
+      `Unexpected JSXAttribute value type '${
+        (attr.value as { type: string }).type
+      }' for attribute '${attr.name?.name ?? "unknown"}' at position ${
+        attr.start ?? "unknown"
+      }`
+    )
+  }
+  // Defensive: completely unexpected value
+  throw new Error(
+    `Unexpected JSXAttribute value for attribute '${
+      attr.name?.name ?? "unknown"
+    }' at position ${attr.start ?? "unknown"}`
+  )
 }
