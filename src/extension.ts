@@ -35,16 +35,15 @@ const DEFAULT_INCLUDE_TAG_IN_ATTR_NAV = true
  */
 const boundaryCache = new LRU<string, number[]>({ max: 40 })
 
-function hashText(text: string): string {
-  return createHash("sha1").update(text).digest("hex")
-}
-
 /**
  * Returns cached boundary positions for a given function and document text.
  *
  * Caches the result of the boundary function (e.g., tag or attribute locator) using a key
  * composed of the document content hash and the function's name. This ensures that each
  * boundary function's results are cached independently for each unique document state.
+ *
+ * WARNING: If an anonymous function is passed as the boundary locator, all such functions will share the same cache key ("anonymous").
+ * This may cause cache collisions and incorrect results. Prefer named functions for boundary locators.
  *
  * @param text - The full document text to analyze.
  * @param fn - The boundary locator function (must have a unique .name property).
@@ -56,8 +55,12 @@ function getCachedBoundaries(
 ): number[] {
   // Use the function's name to distinguish cache entries for different boundary functions
   const fnName = fn.name || "anonymous"
+
+  // Create a SHA-1 hash of the text
+  const textHash = createHash("sha1").update(text).digest("hex")
+
   // Cache key is the hash of the text plus the function name
-  const key = hashText(text) + ":" + fnName
+  const key = textHash + ":" + fnName
   let entry = boundaryCache.get(key)
   if (!entry) {
     // Compute and cache the result if not present
