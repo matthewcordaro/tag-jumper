@@ -1,5 +1,6 @@
 {
   "name": "tag-jumper",
+  "publisher": "matthew-cordaro",
   "displayName": "Tag Jumper",
   "description": "Quickly jump between tags and attributes in HTML, HTX, JSX, and TSX files.",
   "version": "0.0.1",
