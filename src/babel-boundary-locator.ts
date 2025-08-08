@@ -71,6 +71,9 @@ const JSX_EXPRESSION_TYPE_OFFSETS: Record<string, number> = {
   TupleExpression: -2, // <Widget values={[1, 2]} />
 }
 
+/**
+ * Babel parser options for analyzing JSX/TSX code.
+ */
 const BABEL_PARSE_OPTIONS: ParserOptions = {
   sourceType: "module",
   plugins: ["jsx", "typescript"],
