@@ -69,22 +69,6 @@ function jumpToBoundary(
  * @param context - The extension context provided by VS Code.
  */
 export function activate(context: vscode.ExtensionContext) {
-  // DEV ONLY: Open tester.jsx if it exists in the workspace when debugging
-  if (process.env.VSCODE_DEBUG_MODE || process.env.NODE_ENV === "development") {
-    const wsFolders = vscode.workspace.workspaceFolders
-    if (wsFolders) {
-      const testerPath = vscode.Uri.joinPath(wsFolders[0].uri, "tester.jsx")
-      vscode.workspace.openTextDocument(testerPath).then(
-        (doc) => {
-          vscode.window.showTextDocument(doc, { preview: false })
-        },
-        () => {
-          /* ignore if not found */
-        }
-      )
-    }
-  }
-
   context.subscriptions.push(
     vscode.commands.registerCommand("tag-jumper.jumpForwardTag", () => {
       jumpToBoundary(getTagBoundaryPositions, "next")
