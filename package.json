@@ -59,6 +59,22 @@
           "type": "boolean",
           "default": true,
           "description": "If enabled, attribute navigation will also include tag navigation positions."
+        },
+        "tag-jumper.activationOnLanguage": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [
+            "html",
+            "xml",
+            "javascript",
+            "typescript",
+            "javascriptreact",
+            "typescriptreact",
+            "jsx",
+            "tsx",
+            "htx"
+          ],
+          "description": "List of VS Code language IDs for which Tag Jumper is active. You can customize this to restrict or expand activation to specific languages. (Must be supported by Babel's parser.)"
         }
       }
     }
