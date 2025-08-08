@@ -23,7 +23,7 @@ import type { ParserOptions } from "@babel/parser"
 // Lookup table for JSXExpressionContainer types and their offsets
 const JSX_EXPRESSION_TYPE_OFFSETS: Record<string, number> = {
   ArrayExpression: -2, // <Button data={[1, 2, 3]} />
-  ArrowFunctionExpression: -1, // <Button onClick={e => doSomething(e)} />
+  ArrowFunctionExpression: -2, // <Button onClick={e => doSomething(e)} />
   AssignmentExpression: -2, // <Button value={(foo = 'bar')} />
   AwaitExpression: -1, // <Widget data={await fetchData()} />
   BigIntLiteral: -1, // <Widget count={123n} />
