@@ -27,12 +27,13 @@ import { createHash } from "crypto"
 // Default value for including tag positions in attribute navigation
 const DEFAULT_INCLUDE_TAG_IN_ATTR_NAV = true
 
-// LRU cache for boundary positions by text hash
-// The cache is intentionally keyed by a hash of the document content, so undo/redo operations
-// that restore previous content can instantly reuse cached results. This avoids unnecessary AST parsing.
-const boundaryCache = new LRU<string, number[]>({
-  max: 40,
-})
+/**
+ * LRU cache for boundary positions to avoid unnecessary AST parsing.
+ * The cache is intentionally keyed by a hash of the document content appended
+ * with the function's name, so undo/redo operations that restore previous
+ * content can instantly reuse cached results.
+ */
+const boundaryCache = new LRU<string, number[]>({ max: 40 })
 
 function hashText(text: string): string {
   return createHash("sha1").update(text).digest("hex")
@@ -69,6 +70,7 @@ function getCachedBoundaries(
 /**
  * Moves the cursor to the next or previous boundary position as determined by one or more boundary locator functions.
  *
+ * - Checks if the active editor's language is enabled in activationOnLanguage. If not, does nothing.
  * - Collects all boundary positions from the provided functions.
  * - Deduplicates and sorts the positions.
  * - Finds the next or previous position relative to the current cursor.
@@ -85,13 +87,18 @@ function jumpToBoundary(
   const editor = vscode.window.activeTextEditor
   if (!editor) return
 
+  // Only proceed if the current document's language is enabled in activationOnLanguage
+  if (!isLanguageActive(editor.document)) return
+
   // Get the full document text
   const text = editor.document.getText()
+
   // Gather all boundary positions from all functions
   let positions: number[] = []
   for (const fn of boundaryFns) {
     positions = positions.concat(getCachedBoundaries(text, fn))
   }
+
   // Remove duplicates and sort positions in ascending order
   positions = Array.from(new Set(positions))
   positions.sort((a, b) => a - b)
@@ -112,6 +119,33 @@ function jumpToBoundary(
     editor.selection = new vscode.Selection(targetPos, targetPos)
     editor.revealRange(new vscode.Range(targetPos, targetPos))
   }
+}
+
+/**
+ * Checks if the current document's language is enabled in the activationOnLanguage setting.
+ *
+ * This function reads the user's configuration for Tag Jumper and determines whether the
+ * languageId of the provided document is included in the list of active languages. This allows
+ * dynamic support for any language the user adds to the activationOnLanguage setting, rather than
+ * relying on hardcoded language checks.
+ *
+ * @param document - The VS Code TextDocument to check.
+ * @returns true if the document's languageId is enabled for Tag Jumper, false otherwise.
+ */
+function isLanguageActive(document: vscode.TextDocument): boolean {
+  const config = vscode.workspace.getConfiguration("tag-jumper")
+  const activeLangs = config.get<string[]>("activationOnLanguage", [
+    "html",
+    "xml",
+    "javascript",
+    "typescript",
+    "javascriptreact",
+    "typescriptreact",
+    "jsx",
+    "tsx",
+    "htx",
+  ])
+  return activeLangs.includes(document.languageId)
 }
 
 /**
