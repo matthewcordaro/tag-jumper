@@ -1,22 +1,37 @@
 # Tag Jumper VS Code Extension
 
-Tag Jumper is a VS Code extension for quickly jumping between tags and attributes in HTML, HTX, JSX, and TSX files. It is designed for fast navigation in markup-heavy codebases, supporting both tag and attribute navigation with user-configurable behavior.
+[![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/matthew-cordaro.tag-jumper?label=VS%20Code%20Marketplace)](https://marketplace.visualstudio.com/items?itemName=matthew-cordaro.tag-jumper)
+[![GitHub Repo](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/mcordaro/tag-jumper)
+
+Tag Jumper is a [Visual Studio Code](https://code.visualstudio.com/) extension for quickly jumping between tags and attributes in HTML, HTX, JSX, and TSX files. It is designed for fast navigation in markup-heavy codebases, supporting both tag and attribute navigation with user-configurable behavior.
+
+---
 
 ## Features
 
 - **Jump between element tags** (open/self-closing) and attributes in supported files.
 - **Keyboard Shortcuts:**
-  - Move Forward/Backward Element Tags: `Ctrl+Super+Alt+Down` / `Ctrl+Super+Alt+Up`
-  - Move Forward/Backward Through Element Attributes: `Ctrl+Super+Alt+Right` / `Ctrl+Super+Alt+Left`
+  - Move Forward/Backward Element Tags: <kbd>Ctrl</kbd>+<kbd>Super</kbd>+<kbd>Alt</kbd>+<kbd>Down</kbd> / <kbd>Ctrl</kbd>+<kbd>Super</kbd>+<kbd>Alt</kbd>+<kbd>Up</kbd>
+  - Move Forward/Backward Through Element Attributes: <kbd>Ctrl</kbd>+<kbd>Super</kbd>+<kbd>Alt</kbd>+<kbd>Right</kbd> / <kbd>Ctrl</kbd>+<kbd>Super</kbd>+<kbd>Alt</kbd>+<kbd>Left</kbd>
 - **Configurable attribute navigation:**
   - By default, attribute navigation also includes tag boundaries (can be changed in settings).
 - **Fast:** Uses a per-function, per-document-content cache for boundary positions.
+- **Configurable activation languages:** Choose which languages Tag Jumper activates on (see settings).
+
+---
 
 ## Settings
 
 - `tag-jumper.includeTagPositionsInAttributeNavigation` (boolean, default: `true`)
+
   - If enabled, attribute navigation will also include tag navigation positions.
   - Change this in VS Code settings UI or your `settings.json`.
+
+- `tag-jumper.activationOnLanguage` (array of strings)
+  - List of VS Code language IDs for which Tag Jumper is enabled (e.g., `html`, `xml`, `jsx`, `tsx`, `htx`, `javascriptreact`, `typescriptreact`).
+  - Defaults to all Babel-supported markup and JSX-like languages.
+
+---
 
 ## How It Works
 
@@ -24,13 +39,29 @@ Tag Jumper is a VS Code extension for quickly jumping between tags and attribute
 - Navigation commands use a cache keyed by document content and boundary function for performance.
 - The extension is written in TypeScript and follows modern VS Code extension best practices.
 
+---
+
+## Installation
+
+Install via the [Visual Studio Code Marketplace](https://marketplace.visualstudio.com/items?itemName=matthew-cordaro.tag-jumper) or search for "Tag Jumper" in the Extensions sidebar in VS Code.
+
+---
+
 ## Development
 
 - **Build:** `npm run compile`
 - **Test:** `npm test`
 - **Lint:** `npm run lint`
-- **Watch:** `npm run watch`
 - **Add tests:** Place new test files in `src/test/`, run `npm run compile-tests`, then `npm test`.
+
+---
+
+## Feedback, Issues, and Contributions
+
+This extension is maintained on [GitHub](https://github.com/mcordaro/tag-jumper).
+Please use the repository for bug reports, feature requests, and contributions!
+
+---
 
 ## Key Files
 
@@ -38,11 +69,8 @@ Tag Jumper is a VS Code extension for quickly jumping between tags and attribute
 - `src/babel-boundary-locator.ts` — Tag and attribute boundary logic
 - `src/test/extension.test.ts` — Main test suite
 
-## Requirements
-
-- Node.js >= 16
-- VS Code >= 1.70
+---
 
 ## License
 
-MIT
+This project is licensed under the [GNU General Public License v3.0](./LICENSE).
