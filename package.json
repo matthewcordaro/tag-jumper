@@ -67,6 +67,7 @@
     "test": "vscode-test --extensionDevelopmentPath=. --extensionTestsPath=./out/test/runTest.js"
   },
   "devDependencies": {
+    "@types/babel__traverse": "^7.28.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "20.x",
     "@types/vscode": "^1.102.0",
@@ -81,6 +82,8 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "@babel/parser": "^7.28.0",
+    "@babel/traverse": "^7.28.0",
     "lru-cache": "^7.18.3"
   }
 }
