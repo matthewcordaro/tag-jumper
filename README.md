@@ -1,4 +1,4 @@
-# Tag Jumper VS Code Extension
+# Tag Jumper
 
 [![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/matthew-cordaro.tag-jumper?label=VS%20Code%20Marketplace)](https://marketplace.visualstudio.com/items?itemName=matthew-cordaro.tag-jumper)
 [![GitHub Repo](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/matthewcordaro/tag-jumper)
