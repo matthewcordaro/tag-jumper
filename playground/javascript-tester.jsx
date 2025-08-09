@@ -198,7 +198,7 @@ function tester() {
       </main>
 
       <footer>
-        <small>&copy; 2024 Tag Jumper Playground</small>
+        <small>&copy; 2025 Tag Jumper Playground</small>
       </footer>
     </>
   )
