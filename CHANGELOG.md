@@ -2,6 +2,9 @@
 
 All notable changes to the "tag-jumper" extension will be documented in this file.
 
+## [1.0.1] - Initial Release
+ - Fixed broken repository url.
+
 ## [1.0.0] - Initial Release
 
 - Initial Release of Tag Jumper extension for VS Code.
