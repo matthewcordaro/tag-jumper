@@ -18,7 +18,7 @@
 
 import { parse } from "@babel/parser"
 import traverse from "@babel/traverse"
-import type { JSXAttribute, JSXSpreadAttribute } from "@babel/types"
+import type { JSXAttribute } from "@babel/types"
 import type { ParserOptions } from "@babel/parser"
 
 // Lookup table for JSXExpressionContainer types and their offsets
