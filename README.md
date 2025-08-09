@@ -22,7 +22,7 @@ Tag Jumper is a [Visual Studio Code](https://code.visualstudio.com/) extension f
   - Jump Backward Through Element Attributes: <kbd>Ctrl</kbd>+<kbd>Super</kbd>+<kbd>Alt</kbd>+<kbd>Left</kbd>
 - **Configurable attribute navigation:**
   - By default, attribute navigation also includes tag boundaries (can be changed in settings).
-- **Fast:** Uses a per-function, per-document-content cache for boundary positions.
+- **Fast:** Uses a per-document-content and per-function position cache for rapid jumping when undoing/redoing changes in large documents.
 - **Configurable activation languages:** Choose which languages Tag Jumper activates on (see settings).
 
 ---
