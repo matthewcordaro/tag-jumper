@@ -3,7 +3,7 @@
   "publisher": "matthew-cordaro",
   "displayName": "Tag Jumper⚡",
   "description": "Fast tag and attribute jumping in HTML, HTX, JSX, and TSX files.",
-  "version": "1.0.0-rc1",
+  "version": "1.0.0",
   "engines": {
     "vscode": "^1.102.0"
   },
