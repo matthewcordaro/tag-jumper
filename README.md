@@ -1,7 +1,7 @@
 # Tag Jumper VS Code Extension
 
 [![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/matthew-cordaro.tag-jumper?label=VS%20Code%20Marketplace)](https://marketplace.visualstudio.com/items?itemName=matthew-cordaro.tag-jumper)
-[![GitHub Repo](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/mcordaro/tag-jumper)
+[![GitHub Repo](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/matthewcordaro/tag-jumper)
 
 Tag Jumper is a [Visual Studio Code](https://code.visualstudio.com/) extension for quickly jumping between tags and attributes in HTML, HTX, JSX, and TSX files. It is designed for fast navigation in markup-heavy codebases, supporting both tag and attribute navigation with user-configurable behavior.
 
@@ -51,14 +51,12 @@ Install via the [Visual Studio Code Marketplace](https://marketplace.visualstudi
 
 - **Build:** `npm run compile`
 - **Test:** `npm test`
-- **Lint:** `npm run lint`
-- **Add tests:** Place new test files in `src/test/`, run `npm run compile-tests`, then `npm test`.
 
 ---
 
 ## Feedback, Issues, and Contributions
 
-This extension is maintained on [GitHub](https://github.com/mcordaro/tag-jumper).
+This extension is maintained on [GitHub](https://github.com/matthewcordaro/tag-jumper).
 Please use the repository for bug reports, feature requests, and contributions!
 
 ---
