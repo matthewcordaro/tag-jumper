@@ -158,16 +158,17 @@ function isLanguageActive(document: vscode.TextDocument): boolean {
  */
 export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
-    // Tag navigation commands
+    // Tag navigation: next
     vscode.commands.registerCommand("tag-jumper.jumpForwardTag", () => {
       jumpToBoundary([getTagBoundaryPositions], "next")
     }),
 
+    // Tag navigation: previous
     vscode.commands.registerCommand("tag-jumper.jumpBackwardTag", () => {
       jumpToBoundary([getTagBoundaryPositions], "prev")
     }),
 
-    // Attribute navigation commands
+    // Attribute navigation: next
     vscode.commands.registerCommand("tag-jumper.jumpForwardAttribute", () => {
       const config = vscode.workspace.getConfiguration("tag-jumper")
       const includeTag = config.get<boolean>(
@@ -180,6 +181,7 @@ export function activate(context: vscode.ExtensionContext) {
       jumpToBoundary(fns, "next")
     }),
 
+    // Attribute navigation: previous
     vscode.commands.registerCommand("tag-jumper.jumpBackwardAttribute", () => {
       const config = vscode.workspace.getConfiguration("tag-jumper")
       const includeTag = config.get<boolean>(
