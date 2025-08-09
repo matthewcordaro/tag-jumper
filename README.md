@@ -10,9 +10,16 @@ Tag Jumper is a [Visual Studio Code](https://code.visualstudio.com/) extension f
 ## Features
 
 - **Jump between element tags** (open/self-closing) and attributes in supported files.
+- **Commands:**
+  - `Tag Jumper: Jump Forward Through Element Tags` (`tag-jumper.jumpForwardTag`)
+  - `Tag Jumper: Jump Backward Through Element Tags` (`tag-jumper.jumpBackwardTag`)
+  - `Tag Jumper: Jump Forward Through Element Attributes` (`tag-jumper.jumpForwardAttribute`)
+  - `Tag Jumper: Jump Backward Through Element Attributes` (`tag-jumper.jumpBackwardAttribute`)
 - **Keyboard Shortcuts:**
-  - Move Forward/Backward Element Tags: <kbd>Ctrl</kbd>+<kbd>Super</kbd>+<kbd>Alt</kbd>+<kbd>Down</kbd> / <kbd>Ctrl</kbd>+<kbd>Super</kbd>+<kbd>Alt</kbd>+<kbd>Up</kbd>
-  - Move Forward/Backward Through Element Attributes: <kbd>Ctrl</kbd>+<kbd>Super</kbd>+<kbd>Alt</kbd>+<kbd>Right</kbd> / <kbd>Ctrl</kbd>+<kbd>Super</kbd>+<kbd>Alt</kbd>+<kbd>Left</kbd>
+  - Jump Forward Through Element Tags: <kbd>Ctrl</kbd>+<kbd>Super</kbd>+<kbd>Alt</kbd>+<kbd>Down</kbd>
+  - Jump Backward Through Element Tags: <kbd>Ctrl</kbd>+<kbd>Super</kbd>+<kbd>Alt</kbd>+<kbd>Up</kbd>
+  - Jump Forward Through Element Attributes: <kbd>Ctrl</kbd>+<kbd>Super</kbd>+<kbd>Alt</kbd>+<kbd>Right</kbd>
+  - Jump Backward Through Element Attributes: <kbd>Ctrl</kbd>+<kbd>Super</kbd>+<kbd>Alt</kbd>+<kbd>Left</kbd>
 - **Configurable attribute navigation:**
   - By default, attribute navigation also includes tag boundaries (can be changed in settings).
 - **Fast:** Uses a per-function, per-document-content cache for boundary positions.
@@ -24,12 +31,12 @@ Tag Jumper is a [Visual Studio Code](https://code.visualstudio.com/) extension f
 
 - `tag-jumper.includeTagPositionsInAttributeNavigation` (boolean, default: `true`)
 
-  - If enabled, attribute navigation will also include tag navigation positions.
+  - If enabled, attribute navigation will also include tag navigation positions. This allows attribute navigation to jump to both attribute and tag boundaries.
   - Change this in VS Code settings UI or your `settings.json`.
 
 - `tag-jumper.activationOnLanguage` (array of strings)
-  - List of VS Code language IDs for which Tag Jumper is enabled (e.g., `html`, `xml`, `jsx`, `tsx`, `htx`, `javascriptreact`, `typescriptreact`).
-  - Defaults to all Babel-supported markup and JSX-like languages.
+  - List of VS Code language IDs for which Tag Jumper is active. You can customize this to restrict or expand activation to specific languages. (Must be supported by Babel's parser.)
+  - Defaults to: `["html", "xml", "javascript", "typescript", "javascriptreact", "typescriptreact", "jsx", "tsx", "htx"]`
 
 ---
 
