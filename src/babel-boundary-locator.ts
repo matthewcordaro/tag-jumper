@@ -18,6 +18,7 @@
 
 import { parse } from "@babel/parser"
 import traverse from "@babel/traverse"
+import type { JSXAttribute, JSXSpreadAttribute } from "@babel/types"
 import type { ParserOptions } from "@babel/parser"
 
 // Lookup table for JSXExpressionContainer types and their offsets
@@ -96,7 +97,6 @@ const BABEL_PARSE_OPTIONS: ParserOptions = {
  */
 export function getTagBoundaryPositions(text: string): number[] {
   const ast = parse(text, BABEL_PARSE_OPTIONS)
-
   const boundaries: number[] = []
 
   traverse(ast, {
@@ -104,13 +104,8 @@ export function getTagBoundaryPositions(text: string): number[] {
     JSXOpeningElement(path) {
       const { end, selfClosing } = path.node
       if (typeof end === "number") {
-        if (selfClosing) {
-          // For self-closing tags, the boundary is just before the '/>'
-          boundaries.push(end - 2)
-        } else {
-          // For open tags, the boundary is just before the '>'
-          boundaries.push(end - 1)
-        }
+        if (selfClosing) boundaries.push(end - 2) // Self-closing tag
+        else boundaries.push(end - 1) // Opening tag
       }
     },
   })
@@ -125,6 +120,9 @@ export function getTagBoundaryPositions(text: string): number[] {
  * - Handles all attribute types, including spread attributes, string literals, expressions, fragments, and booleans.
  * - Throws an error if an unexpected attribute structure is encountered.
  *
+ * Internally, this function uses a top-level switch on attribute type and delegates JSXAttribute value handling
+ * to the getJSXAttributeBoundary helper for clarity and maintainability.
+ *
  * @example
  *   // For `<input value="foo" checked />`, returns offsets after 'foo', before the '"', and after 'checked'.
  *
@@ -134,91 +132,105 @@ export function getTagBoundaryPositions(text: string): number[] {
 export function getAttributeBoundaryPositions(text: string): number[] {
   const ast = parse(text, BABEL_PARSE_OPTIONS)
   const boundaries: number[] = []
+
   traverse(ast, {
     JSXOpeningElement(path) {
       for (const attr of path.node.attributes) {
+        // Defensive: all attributes should have an end position
         if (!attr.end) {
+          const attrStart = attr.start ?? "unknown"
           throw new Error(
-            `Unexpected missing end position for attribute at position ${
-              attr.start ?? "unknown"
-            }`
+            `Unexpected missing end position for attribute at position ${attrStart}`
           )
         }
+
+        // Handle each attribute type
         switch (attr.type) {
           case "JSXSpreadAttribute":
-            // <input {...props} />
+            // JSXSpreadAttribute: <input {...props} />
             boundaries.push(attr.end - 1)
             break
           case "JSXAttribute":
+            // JSXAttribute: delegate to helper for all value types
             boundaries.push(getJSXAttributeBoundary(attr))
             break
-          default: {
+          default:
+            // Defensive: unknown attribute type
             const attrType = (attr as any).type ?? "unknown"
             const attrStart = (attr as any).start ?? "unknown"
             throw new Error(
               `Unexpected attribute type '${attrType}' at position ${attrStart}`
             )
-          }
         }
       }
     },
   })
+
   return boundaries
 }
 
-function getJSXAttributeBoundary(attr: any): number {
-  // Boolean attribute: <input visible />
-  if (attr.value === null) {
-    return attr.end
-  }
-  // Defensive: should never be undefined
-  if (attr.value === undefined) {
+/**
+ * Computes the boundary position of a JSX attribute in source code.
+ *
+ * Determines the end boundary of a JSX attribute, which varies depending on the attribute's value type:
+ * - For boolean attributes (e.g., `<input visible />`), the boundary is at the end of the attribute name.
+ * - For string literals, JSX fragments, or JSX elements as values, the boundary is just before the closing quote or tag.
+ * - For expression containers (e.g., `<input value={foo} />`), the boundary is calculated using a lookup table based on the expression type.
+ *
+ * Throws an error if the attribute value is undefined or of an unexpected type.
+ *
+ * @param attr - The JSX attribute node (from Babel AST), containing name, value, start, and end positions.
+ * @returns The numeric position in the source code representing the boundary of the attribute.
+ * @throws {Error} If the attribute value is undefined, missing, or of an unknown/unsupported type.
+ */
+function getJSXAttributeBoundary(attr: JSXAttribute): number {
+  // Defensive: end should be a number
+  if (typeof attr.end !== "number") {
+    const attrName = attr.name?.name ?? "unknown"
+    const attrStart = attr.start ?? "unknown"
     throw new Error(
-      `Unexpected undefined attribute value for attribute '${
-        attr.name?.name ?? "unknown"
-      }' at position ${attr.start ?? "unknown"}`
+      `Unexpected missing end position for attribute '${attrName}' at position ${attrStart}`
     )
   }
-  // String literal, JSX fragment, or JSX element as value
+
+  // Boolean attribute: <input visible />
+  if (attr.value === null) return attr.end
+
+  // Defensive: should never be undefined
+  if (attr.value === undefined) {
+    const attrName = attr.name?.name ?? "unknown"
+    const attrStart = attr.start ?? "unknown"
+    throw new Error(
+      `Unexpected undefined attribute value for attribute '${attrName}' at position ${attrStart}`
+    )
+  }
+
+  // StringLiteral, JSXFragment, or JSXElement type
   if (
     attr.value.type === "StringLiteral" || // <input value="foo"
     attr.value.type === "JSXFragment" || // <Widget content={<>{foo}</>} />
     attr.value.type === "JSXElement" // <Widget content={<span>bar</span>} />
-  ) {
+  )
     return attr.end - 1
-  }
-  // Expression container: <input value={foo} />
-  if (attr.value.type === "JSXExpressionContainer") {
-    const exprType = attr.value.expression.type
-    const offset = JSX_EXPRESSION_TYPE_OFFSETS[exprType]
-    if (typeof offset === "number") {
-      return attr.end + offset
-    } else {
-      throw new Error(
-        `Unexpected JSXExpressionContainer type '${exprType}' for attribute '${
-          attr.name?.name ?? "unknown"
-        }' at position ${attr.start ?? "unknown"}`
-      )
-    }
-  }
+
+  // JSXExpressionContainer: use the offset lookup table
+  if (attr.value.type === "JSXExpressionContainer")
+    return attr.end + JSX_EXPRESSION_TYPE_OFFSETS[attr.value.expression.type]
+
   // Defensive: unknown object with a type
-  if (
-    typeof attr.value === "object" &&
-    attr.value !== null &&
-    "type" in attr.value
-  ) {
+  if (attr.value && typeof attr.value === "object" && "type" in attr.value) {
+    const valueType = (attr.value as { type: string }).type
+    const attrName = attr.name?.name ?? "unknown"
+    const attrStart = attr.start ?? "unknown"
     throw new Error(
-      `Unexpected JSXAttribute value type '${
-        (attr.value as { type: string }).type
-      }' for attribute '${attr.name?.name ?? "unknown"}' at position ${
-        attr.start ?? "unknown"
-      }`
+      `Unexpected JSXAttribute value type '${valueType}' for attribute '${attrName}' at position ${attrStart}`
     )
   }
+
   // Defensive: completely unexpected value
+  const attrName = attr.name?.name ?? "unknown"
+  const attrStart = attr.start ?? "unknown"
   throw new Error(
-    `Unexpected JSXAttribute value for attribute '${
-      attr.name?.name ?? "unknown"
-    }' at position ${attr.start ?? "unknown"}`
+    `Unexpected JSXAttribute value for attribute '${attrName}' at position ${attrStart}`
   )
 }
