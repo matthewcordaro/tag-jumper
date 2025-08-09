@@ -1,9 +1,9 @@
 {
   "name": "tag-jumper",
   "publisher": "matthew-cordaro",
-  "displayName": "Tag Jumper",
-  "description": "Quickly jump between tags and attributes in HTML, HTX, JSX, and TSX files.",
-  "version": "0.0.1",
+  "displayName": "Tag Jumper⚡",
+  "description": "Fast tag and attribute jumping in HTML, HTX, JSX, and TSX files.",
+  "version": "1.0.0-rc1",
   "engines": {
     "vscode": "^1.102.0"
   },
@@ -111,5 +111,15 @@
     "@babel/parser": "^7.28.0",
     "@babel/traverse": "^7.28.0",
     "lru-cache": "^7.18.3"
+  },
+  "activationEvents": [
+    "onCommand:tag-jumper.jumpForwardTag",
+    "onCommand:tag-jumper.jumpBackwardTag",
+    "onCommand:tag-jumper.jumpForwardAttribute",
+    "onCommand:tag-jumper.jumpBackwardAttribute"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/matthew-cordaro/tag-jumper.git"
   }
 }
